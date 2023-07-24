@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/davveo/go-toolkit/sms"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dysmsapi"
 )
@@ -21,17 +22,33 @@ type AliyunResult struct {
 	Message   string
 }
 
-func GetAliyunClient(accessId string,
-	accessKey string, sign string, template string) (*AliyunClient, error) {
-	client, err := dysmsapi.NewClientWithAccessKey(region, accessId, accessKey)
+/*
+	NewAliYunClient(
+		WithAccessId(""),
+		WithAccessKey(),
+		WithSign(),
+		WithTemplate()
+	)
+*/
+
+func NewAliYunClient(options ...sms.InitOption) (*AliyunClient, error) {
+	opts := &sms.InitOptions{}
+	for _, option := range options {
+		option(opts)
+	}
+	if opts.AccessKey == "" || opts.AccessId == "" ||
+		opts.Template == "" || opts.Sign == "" {
+		return nil, fmt.Errorf("参数有误")
+	}
+	client, err := dysmsapi.NewClientWithAccessKey(
+		region, opts.AccessId, opts.AccessKey)
 	if err != nil {
 		return nil, err
 	}
-
 	aliYunClient := &AliyunClient{
-		template: template,
+		template: opts.Template,
 		core:     client,
-		sign:     sign,
+		sign:     opts.Sign,
 	}
 
 	return aliYunClient, nil

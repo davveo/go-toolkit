@@ -2,6 +2,7 @@ package twilio
 
 import (
 	"fmt"
+	"github.com/davveo/go-toolkit/sms"
 	"github.com/twilio/twilio-go"
 	"strings"
 
@@ -13,15 +14,20 @@ type TwilioClient struct {
 	core     *twilio.RestClient
 }
 
-func GetTwilioClient(accessId string, accessKey string, template string) (*TwilioClient, error) {
+func NewTwilioClient(options ...sms.InitOption) (*TwilioClient, error) {
+	opts := &sms.InitOptions{}
+	for _, option := range options {
+		option(opts)
+	}
+
 	client := twilio.NewRestClientWithParams(twilio.ClientParams{
-		Username: accessId,
-		Password: accessKey,
+		Username: opts.AccessId,
+		Password: opts.AccessKey,
 	})
 
 	twilioClient := &TwilioClient{
 		core:     client,
-		template: template,
+		template: opts.Template,
 	}
 
 	return twilioClient, nil

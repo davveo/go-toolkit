@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/davveo/go-toolkit/sms"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -18,11 +19,15 @@ type HuyiClient struct {
 	template string
 }
 
-func GetHuyiClient(appId string, appKey string, template string) (*HuyiClient, error) {
+func NewHuYiClient(options ...sms.InitOption) (*HuyiClient, error) {
+	opts := &sms.InitOptions{}
+	for _, option := range options {
+		option(opts)
+	}
 	return &HuyiClient{
-		appId:    appId,
-		appKey:   appKey,
-		template: template,
+		appId:    opts.AccessId,
+		appKey:   opts.AccessKey,
+		template: opts.Template,
 	}, nil
 }
 

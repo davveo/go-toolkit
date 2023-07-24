@@ -4,31 +4,36 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-
-	"github.com/volcengine/volc-sdk-golang/service/sms"
+	"github.com/davveo/go-toolkit/sms"
+	_sms "github.com/volcengine/volc-sdk-golang/service/sms"
 )
 
 type VolcClient struct {
-	core       *sms.SMS
+	core       *_sms.SMS
 	sign       string
 	template   string
 	smsAccount string
 }
 
-func GetVolcClient(accessId, accessKey, sign, templateId string, smsAccount []string) (*VolcClient, error) {
-	if len(smsAccount) < 1 {
+func NewVolcClient(options ...sms.InitOption) (*VolcClient, error) {
+	opts := &sms.InitOptions{}
+	for _, option := range options {
+		option(opts)
+	}
+
+	if len(opts.Extra) < 1 {
 		return nil, fmt.Errorf("missing parameter: smsAccount")
 	}
 
-	client := sms.NewInstance()
-	client.Client.SetAccessKey(accessId)
-	client.Client.SetSecretKey(accessKey)
+	client := _sms.NewInstance()
+	client.Client.SetAccessKey(opts.AccessId)
+	client.Client.SetSecretKey(opts.AccessKey)
 
 	volcClient := &VolcClient{
 		core:       client,
-		sign:       sign,
-		template:   templateId,
-		smsAccount: smsAccount[0],
+		sign:       opts.Sign,
+		template:   opts.Template,
+		smsAccount: opts.Extra[0],
 	}
 
 	return volcClient, nil
@@ -51,7 +56,7 @@ func (c *VolcClient) SendMessage(param map[string]string, targetPhoneNumber ...s
 		phoneNumbers.WriteString(s)
 	}
 
-	req := &sms.SmsRequest{
+	req := &_sms.SmsRequest{
 		SmsAccount:    c.smsAccount,
 		Sign:          c.sign,
 		TemplateID:    c.template,

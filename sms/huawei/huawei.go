@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
+	"github.com/davveo/go-toolkit/sms"
 	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
 	"net/http"
@@ -26,20 +27,25 @@ type HuaweiClient struct {
 	sender     string
 }
 
-func GetHuaweiClient(accessId string, accessKey string, sign string, template string, other []string) (*HuaweiClient, error) {
-	if len(other) < 2 {
+func NewHuaweiClient(options ...sms.InitOption) (*HuaweiClient, error) {
+	opts := &sms.InitOptions{}
+	for _, option := range options {
+		option(opts)
+	}
+
+	if len(opts.Extra) < 2 {
 		return nil, fmt.Errorf("missing parameter: apiAddress or sender")
 	}
 
-	apiAddress := fmt.Sprintf("%s/sms/batchSendSms/v1", other[0])
+	apiAddress := fmt.Sprintf("%s/sms/batchSendSms/v1", opts.Extra[0])
 
 	huaweiClient := &HuaweiClient{
-		accessId:   accessId,
-		accessKey:  accessKey,
-		sign:       sign,
-		template:   template,
+		accessId:   opts.AccessId,
+		accessKey:  opts.AccessKey,
+		sign:       opts.Sign,
+		template:   opts.Template,
 		apiAddress: apiAddress,
-		sender:     other[1],
+		sender:     opts.Extra[1],
 	}
 
 	return huaweiClient, nil

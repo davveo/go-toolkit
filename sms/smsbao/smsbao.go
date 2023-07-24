@@ -2,6 +2,7 @@ package smsbao
 
 import (
 	"fmt"
+	"github.com/davveo/go-toolkit/sms"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -16,18 +17,23 @@ type SmsBaoClient struct {
 	goodsid  string
 }
 
-func GetSmsbaoClient(username string, apikey string, sign string, template string, other []string) (*SmsBaoClient, error) {
+func NewSmsBaoClient(options ...sms.InitOption) (*SmsBaoClient, error) {
+	opts := &sms.InitOptions{}
+	for _, option := range options {
+		option(opts)
+	}
+
 	var goodsid string
-	if len(other) < 1 {
+	if len(opts.Extra) < 1 {
 		goodsid = ""
 	} else {
-		goodsid = other[0]
+		goodsid = opts.Extra[0]
 	}
 	return &SmsBaoClient{
-		username: username,
-		apikey:   apikey,
-		sign:     sign,
-		template: template,
+		username: opts.AccessId,
+		apikey:   opts.AccessKey,
+		sign:     opts.Sign,
+		template: opts.Template,
 		goodsid:  goodsid,
 	}, nil
 }

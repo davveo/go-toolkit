@@ -16,25 +16,24 @@ type SmsClient interface {
 	SendMessage(param map[string]string, targetPhoneNumber ...string) error
 }
 
-func NewSmsClient(provider phoneChannel, accessId string,
-	accessKey string, sign string, template string, other ...string) (SmsClient, error) {
+func NewSms(provider phoneChannel, options ...InitOption) (SmsClient, error) {
 	switch provider {
 	case AliYun:
-		return aliyun.GetAliyunClient(accessId, accessKey, sign, template)
+		return aliyun.NewAliYunClient(options...)
 	case TencentCloud:
-		return tx.GetTencentClient(accessId, accessKey, sign, template, other)
+		return tx.NewTencentClient(options...)
 	case VolcEngine:
-		return volcengine.GetVolcClient(accessId, accessKey, sign, template, other)
+		return volcengine.NewVolcClient(options...)
 	case HuYi:
-		return huyi.GetHuyiClient(accessId, accessKey, template)
+		return huyi.NewHuYiClient(options...)
 	case HuaweiCloud:
-		return huawei.GetHuaweiClient(accessId, accessKey, sign, template, other)
+		return huawei.NewHuaweiClient(options...)
 	case Twilio:
-		return twilio.GetTwilioClient(accessId, accessKey, template)
+		return twilio.NewTwilioClient(options...)
 	case SmsBao:
-		return smsbao.GetSmsbaoClient(accessId, accessKey, sign, template, other)
+		return smsbao.NewSmsBaoClient(options...)
 	case SubMail:
-		return submail.GetSubmailClient(accessId, accessKey, template)
+		return submail.NewSubMailClient(options...)
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
 	}

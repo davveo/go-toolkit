@@ -2,40 +2,45 @@ package tx
 
 import (
 	"fmt"
-	"strconv"
-
+	"github.com/davveo/go-toolkit/sms"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
-	sms "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sms/v20210111"
+	_sms "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sms/v20210111"
+	"strconv"
 )
 
 type TencentClient struct {
-	core     *sms.Client
+	core     *_sms.Client
 	appId    string
 	sign     string
 	template string
 }
 
-func GetTencentClient(accessId string, accessKey string, sign string, templateId string, appId []string) (*TencentClient, error) {
-	if len(appId) < 1 {
+func NewTencentClient(options ...sms.InitOption) (*TencentClient, error) {
+	opts := &sms.InitOptions{}
+	for _, option := range options {
+		option(opts)
+	}
+
+	if len(opts.Extra) < 1 {
 		return nil, fmt.Errorf("missing parameter: appId")
 	}
 
-	credential := common.NewCredential(accessId, accessKey)
+	credential := common.NewCredential(opts.AccessId, opts.AccessKey)
 	config := profile.NewClientProfile()
 	config.HttpProfile.ReqMethod = "POST"
 
 	region := "ap-guangzhou"
-	client, err := sms.NewClient(credential, region, config)
+	client, err := _sms.NewClient(credential, region, config)
 	if err != nil {
 		return nil, err
 	}
 
 	tencentClient := &TencentClient{
 		core:     client,
-		appId:    appId[0],
-		sign:     sign,
-		template: templateId,
+		sign:     opts.Sign,
+		template: opts.Template,
+		appId:    opts.Extra[0],
 	}
 
 	return tencentClient, nil
@@ -53,7 +58,7 @@ func (c *TencentClient) SendMessage(param map[string]string, targetPhoneNumber .
 		index++
 	}
 
-	request := sms.NewSendSmsRequest()
+	request := _sms.NewSendSmsRequest()
 	request.SmsSdkAppId = common.StringPtr(c.appId)
 	request.SignName = common.StringPtr(c.sign)
 	request.TemplateParamSet = common.StringPtrs(paramArray)

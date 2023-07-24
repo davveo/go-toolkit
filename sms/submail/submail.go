@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/davveo/go-toolkit/sms"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -41,12 +42,17 @@ func buildSubmailPostdata(param map[string]string, appid string, signature strin
 	return postdata
 }
 
-func GetSubmailClient(appid string, signature string, project string) (*SubmailClient, error) {
+func NewSubMailClient(options ...sms.InitOption) (*SubmailClient, error) {
+	opts := &sms.InitOptions{}
+	for _, option := range options {
+		option(opts)
+	}
+
 	submailClient := &SubmailClient{
 		api:       "https://api-v4.mysubmail.com/sms/multixsend",
-		appid:     appid,
-		signature: signature,
-		project:   project,
+		appid:     opts.AccessId,
+		signature: opts.AccessKey,
+		project:   opts.Template,
 	}
 	return submailClient, nil
 }
